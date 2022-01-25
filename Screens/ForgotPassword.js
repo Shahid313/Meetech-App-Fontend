@@ -12,6 +12,8 @@ class ForgotPassword extends React.Component{
         axios.get(baseUrl+`/apis/user/forgot_password?email=${this.state.email}`).then(res => {
             if(res.data.msg == "Verification Code Sent"){
                 this.props.navigation.navigate("OTP", {user_id:res.data.user_id, otp:res.data.otp})
+            }else{
+                alert("User does nmot exist")
             }
         })
     }

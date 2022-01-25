@@ -20,7 +20,11 @@ import {
 const Welcome = ({navigation}) => {
     const Logout = () => {
         AsyncStorage.removeItem('loggedIn');
-            navigation.navigate("Login");
+        navigation.reset({
+            index:0,
+            routes:[{name:'Login'}],
+           
+        });
     }
     return (
             <>

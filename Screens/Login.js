@@ -63,6 +63,8 @@ const Login = ({navigation}) => {
                         routes:[{name:'Welcome'}],
                        
                     });
+                }else{
+                    alert("The password or email is incorrect")
                 }
             }
         )

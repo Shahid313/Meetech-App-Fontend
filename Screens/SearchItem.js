@@ -31,7 +31,7 @@ import {
     TextLinkContent
 } from './../Components/Styles';
 
-import {Text, View , ActivityIndicator,SafeAreaView, ScrollView, StyleSheet,Image, TouchableOpacity} from 'react-native';
+import {Text, View , ActivityIndicator,SafeAreaView, ScrollView, StyleSheet,Image, TouchableOpacity, FlatList} from 'react-native';
 
 //colors
 const {brand,darkLight,primary} = colors;
@@ -49,14 +49,23 @@ const SearchItem = ({navigation}) => {
     const [messageType, setMessageType] = useState();
     const [SearchedItem, setSearchedItem] = useState([]);
     const [showCard, setShowCard] = useState(false)
+    const [NoResultShown, setNoResultShow] = useState(false);
 
     const Search = (credentials, setSubmitting) =>{
     
 
         axios.get(baseUrl+`/apis/items/search_item?item_name=${credentials.ItemName}&&item_color=${credentials.ItemColor}&&place_item_found=${credentials.PlaceName}&&complete_address=${credentials.Address}`).then(res => {
-            setSearchedItem(res.data.items)
-            setShowCard(true)
-            setSubmitting(false)
+            if(res.data.msg == "ItemFound"){
+                setSearchedItem(res.data.items)
+                setShowCard(true)
+                setSubmitting(false)
+                setNoResultShow(false)
+            }else{
+                setShowCard(false)
+                setSubmitting(false)
+                setNoResultShow(true)
+            }
+            
         })
         
     }
@@ -152,17 +161,27 @@ const SearchItem = ({navigation}) => {
 
                     </Formik>
                    { /* card */}
-                   {showCard && SearchedItem ? 
-                <TouchableOpacity onPress={() => SeeItemDetails(SearchedItem._id)} style={styles.card}>
-
-                <Image resizeMode='contain' source={{uri: baseUrl+'/uploads/'+SearchedItem.item_picture}} style={styles.cardImage} />
+                   {showCard && SearchedItem ?
+                   <FlatList data={SearchedItem}
+                   horizontal
+                   keyExtractor={(item, index) => item.key}
+                   showsHorizontalScrollIndicator={true}
+                   renderItem={({item}) => (
+                    <TouchableOpacity key={item._id} onPress={() => SeeItemDetails(item._id)} style={styles.card}>
+                    <Image resizeMode='contain' source={{uri: baseUrl+'/uploads/'+item.item_picture}} style={styles.cardImage} />
                     <View style={styles.cardRight}>
-                    <Text style={styles.cardName}>{SearchedItem.item_name}</Text>
-                    <Text style={styles.cardColor}>{SearchedItem.item_color}</Text>
-                    <Text style={styles.cardPlace}>{SearchedItem.place_item_found}</Text>
+                    <Text style={styles.cardName}>{item.item_name}</Text>
+                    <Text style={styles.cardColor}>{item.item_color}</Text>
+                    <Text style={styles.cardPlace}>{item.place_item_found}</Text>
                     </View>
                 </TouchableOpacity>
+                   )}/>
+                
                 :null}
+
+                {
+                    NoResultShown ? <Text>No Item Found</Text> :null
+                }
 
                     
                     

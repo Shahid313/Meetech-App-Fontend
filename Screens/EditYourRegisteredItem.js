@@ -105,10 +105,13 @@ const EditYourRegisteredItem = ({navigation, route}) => {
             res => {
                 if(res.data.msg == "Item Updated Successfully"){
                     alert("Item Updated Successfully")
+                }else{
+                    alert("Could not update")
                 }
                 
             }
         ).catch(err => console.log(err))
+        setSubmitting(false)
         
     }
 

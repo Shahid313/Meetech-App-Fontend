@@ -43,6 +43,7 @@ const {brand,darkLight,primary} = colors;
 //API
 import axios from 'axios';
 import { TouchableOpacity } from 'react-native';
+import { FlatList } from 'react-native';
 
 const SearchItemByKeywords = ({navigation}) => {
     const [hidePassword, setHidePassword] = useState(true);
@@ -50,14 +51,28 @@ const SearchItemByKeywords = ({navigation}) => {
     const [messageType, setMessageType] = useState();
     const [searchedItem, setSearchedItem] = useState([]);
     const [showCard, setShowCard] = useState(false);
+    const [NoResultShown, setNoResultShow] = useState(false);
 
     const SearchByKeywords = (credentials, setSubmitting) =>{
 
         axios.get(baseUrl+`/apis/items/search_item_by_keywords?keywords=${credentials.Keywords}`).then(res => {
-            setSearchedItem(res.data.items)
-            setShowCard(true)
-            setSubmitting(false)
+            if(res.data.msg == "ItemFound"){
+                setSearchedItem(res.data.items)
+                setShowCard(true)
+                setSubmitting(false)
+                setNoResultShow(false)
+            }else{
+                // setNoResultShow(true)
+                setShowCard(false)
+                setSubmitting(false)
+                setNoResultShow(true)
+            }
+            
+            
         })
+
+        
+
         
     }
 
@@ -125,18 +140,27 @@ const SearchItemByKeywords = ({navigation}) => {
 
                     </Formik>
                    { /* card */}
-                   {showCard && searchedItem ?
-                <TouchableOpacity onPress={() => SeeItemDetails(searchedItem._id)} style={styles.card}>
-                    <Image resizeMode='contain' source={{uri: baseUrl+'/uploads/'+searchedItem.item_picture}} style={styles.cardImage} />
+                   {showCard ?
+                   <FlatList data={searchedItem}
+                   keyExtractor={(item, index) => item.key}
+                   horizontal
+                   showsHorizontalScrollIndicator={true}
+                   renderItem={({item}) => (
+                    <TouchableOpacity onPress={() => SeeItemDetails(item._id)} style={styles.card}>
+                    <Image resizeMode='contain' source={{uri: baseUrl+'/uploads/'+item.item_picture}} style={styles.cardImage} />
                     <View style={styles.cardRight}>
-                    <Text style={styles.cardName}>{searchedItem.item_name}</Text>
-                    <Text style={styles.cardColor}>{searchedItem.item_color}</Text>
-                    <Text style={styles.cardPlace}>{searchedItem.place_item_found}</Text>
+                    <Text style={styles.cardName}>{item.item_name}</Text>
+                    <Text style={styles.cardColor}>{item.item_color}</Text>
+                    <Text style={styles.cardPlace}>{item.place_item_found}</Text>
                     </View>
                 </TouchableOpacity>
+                   )}/>
+                
                 :null}
 
-                    
+                {
+                    NoResultShown ? <Text>No Item Found</Text> :null
+                }
                     
                 </InnerContainer>
 
@@ -170,6 +194,7 @@ const styles= StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#fff',
+        marginLeft:5,
 elevation: 10
     },
     cardImage:{
